@@ -13,7 +13,7 @@ interface Float {
 }
 
 /** Replays the server's battle log. The client never decides anything here. */
-export function BattleReplay({ data, onClose, onAgain }: { data: FightResponse; onClose: () => void; onAgain?: () => void }) {
+export function BattleReplay({ data, onClose, onAgain, demo }: { data: FightResponse; onClose: () => void; onAgain?: () => void; demo?: boolean }) {
   const { state } = useGame();
   const b = data.battle;
   const you = data.you;
@@ -189,13 +189,13 @@ export function BattleReplay({ data, onClose, onAgain }: { data: FightResponse; 
           <button className="btn block" onClick={skip}>Skip to result</button>
         </div>
       ) : (
-        <Result data={data} onClose={onClose} onAgain={onAgain} />
+        <Result data={data} onClose={onClose} onAgain={onAgain} demo={demo} />
       )}
     </div>
   );
 }
 
-function Result({ data, onClose, onAgain }: { data: FightResponse; onClose: () => void; onAgain?: () => void }) {
+function Result({ data, onClose, onAgain, demo }: { data: FightResponse; onClose: () => void; onAgain?: () => void; demo?: boolean }) {
   const { state } = useGame();
   const b = data.battle;
   const you = data.you;
@@ -213,7 +213,7 @@ function Result({ data, onClose, onAgain }: { data: FightResponse; onClose: () =
       <div className={`verdict ${outcome}`}>{outcome === 'win' ? 'VICTORY' : outcome === 'lose' ? 'DEFEAT' : 'DRAW'}</div>
       <p className="muted small" style={{ margin: '0 0 8px' }}>
         vs {b.fighters[opp].name} · {RACES[b.fighters[opp].raceId].stageNames[b.fighters[opp].evolution - 1]} Lv{b.fighters[opp].level}
-        {b.isBot ? ' · training dummy' : ''}
+        {b.isBot && !demo ? ' · training dummy' : ''}
       </p>
       {data.rewards && (
         <div className="loot-list" style={{ justifyContent: 'center', marginBottom: 10 }}>
@@ -252,14 +252,14 @@ function Result({ data, onClose, onAgain }: { data: FightResponse; onClose: () =
         <br />
         Their skills: {skills(opp)}
       </p>
-      <button className="btn sm" style={{ marginBottom: 10 }} onClick={async () => setVerified((await api.verify(b.id)).verified)}>
+      {!demo && <button className="btn sm" style={{ marginBottom: 10 }} onClick={async () => setVerified((await api.verify(b.id)).verified)}>
         {verified === undefined ? '🔍 Verify this fight' : verified ? '✅ Verified: server replay matches' : '⚠️ Could not verify'}
-      </button>
+      </button>}
       <div className="row">
         <button className="btn block" onClick={onClose}>Back</button>
         {onAgain && (
-          <button className="btn primary block" disabled={(state?.energy.current ?? 0) < 1} onClick={onAgain}>
-            Fight again ⚡1
+          <button className="btn primary block" disabled={!demo && (state?.energy.current ?? 0) < 1} onClick={onAgain}>
+            {demo ? 'Fight again' : 'Fight again ⚡1'}
           </button>
         )}
       </div>
