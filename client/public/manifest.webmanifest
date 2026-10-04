@@ -1,0 +1,9 @@
+{
+  "name": "P.S.O. — Pet Strike Online",
+  "short_name": "P.S.O.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#121626",
+  "theme_color": "#121626",
+  "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+}
